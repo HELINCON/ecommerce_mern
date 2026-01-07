@@ -13,8 +13,9 @@ export const login = async (req, res) => {
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     // Check account lockout
-    if (user.lockUntil && user.lockUntil > Date.now())
-      return res.status(403).json({ message: "Account locked due to failed attempts" });
+    if (user.lockUntil && user.lockUntil > Date.now()){
+      return res.status(403).json({ message: "Account locked due to failed attempts" })
+    };
 
     // Password verification
     const isMatch = await bcrypt.compare(password, user.password);
