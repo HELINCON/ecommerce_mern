@@ -1,22 +1,24 @@
 import AdminInvite from "../models/AdminInvite.js";
 import crypto from "crypto";
-import { sendMail } from "../services/mail.service.js";
+import { enqueueEmail } from "../services/email.dispatch.js";
 
-/**
- * Create admin invite
- */
 export const createAdminInvite = async (req, res) => {
   try {
     const { email } = req.body;
     const token = crypto.randomBytes(32).toString("hex");
 
-    const invite = await AdminInvite.create({
+    await AdminInvite.create({
       email,
       token,
-      expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+      expiresAt: Date.now() + 24 * 60 * 60 * 1000,
     });
 
-    await sendMail(email, "Admin Invite", `Use this token to create admin: ${token}`);
+    await enqueueEmail({
+      to: email,
+      subject: "Admin Invite",
+      text: `Use this token to create admin: ${token}`,
+    });
+
     res.json({ message: "Admin invite sent" });
   } catch (err) {
     console.error(err);

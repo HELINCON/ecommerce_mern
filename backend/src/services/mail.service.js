@@ -1,26 +1,29 @@
-// ✅ Used in auth registration verification and admin invites.
-
-
+// src/services/mail.service.js
 import nodemailer from "nodemailer";
+import { config } from "../config/env.js";
 
-/**
- * Create Nodemailer transporter
- */
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: config.mail.user,
+    pass: config.mail.pass,
   },
 });
 
 /**
- * Send email
+ * Send email — supports OTP and Admin Invite
  */
-export const sendMail = (to, subject, text) =>
-  transporter.sendMail({
-    from: process.env.EMAIL_USER,
+export const sendMail = async (to, subject, text, html = null) => {
+  const mailOptions = {
+    from: config.mail.from,
     to,
     subject,
     text,
-  });
+  };
+
+  if (html) mailOptions.html = html;
+
+  return transporter.sendMail(mailOptions);
+};
